@@ -1,4 +1,4 @@
-import express from "express";
+import express, { RequestHandler } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db";
@@ -14,6 +14,11 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to wellness APIs" });
+});
+
 // use the users router
 app.use("/api/users", userRouter);
 // Use the service provider router
