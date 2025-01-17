@@ -64,7 +64,7 @@ export const signIn = async (req: Request, res: Response) => {
     // Try to find the user in the ServiceProvider collection
     let serviceProvider = await ServiceProvider.findOne({
       email: req.body.email,
-    });
+    }).populate("qrCode");
 
     if (!serviceProvider) {
       return res
@@ -111,11 +111,20 @@ export const getAllUsers = async (req: Request, res: Response) => {
 export const getUserById = async (req: Request, res: Response) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (user) {
+      return res.status(200).json(user);
     }
-    res.status(200).json(user);
+    // Try to find the user in the ServiceProvider collection
+    let serviceProvider = await ServiceProvider.findById(
+      req.params.id
+    ).populate("qrCode");
+    if (serviceProvider) {
+      return res.status(200).json(serviceProvider);
+    }
+    res.status(404).json({ message: "User not found" });
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({ message: "Error fetching user" });
   }
 };

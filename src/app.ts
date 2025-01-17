@@ -6,6 +6,7 @@ import userRouter from "./routes/userRouter";
 import serviceProviderRouter from "./routes/serviceProviderRouter";
 import groupRouter from "./routes/groupRouter";
 import serviceRouter from "./routes/serviceRouter";
+import qrCodeRouter from "./routes/qrcodeRouter";
 
 dotenv.config();
 connectDB();
@@ -27,6 +28,8 @@ app.use("/api/service-providers", serviceProviderRouter);
 app.use("/api/services", serviceRouter);
 // Use the group router
 app.use("/api/groups", groupRouter);
+// use the qrcode router
+app.use("/api/qrcodes", qrCodeRouter);
 
 const PORT = process.env.PORT || 5000;
 

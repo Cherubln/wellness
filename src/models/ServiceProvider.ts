@@ -8,6 +8,7 @@ interface IServiceProvider extends Document {
   services: string[];
   logo?: string;
   role: string;
+  qrCode?: Schema.Types.ObjectId;
 }
 
 const ServiceProviderSchema = new Schema<IServiceProvider>({
@@ -18,6 +19,7 @@ const ServiceProviderSchema = new Schema<IServiceProvider>({
   services: { type: [String], required: true },
   role: { type: String, default: "service_provider" },
   logo: { type: String }, // Made optional
+  qrCode: { type: Schema.Types.ObjectId, ref: "QrCode" },
 });
 
 export default model<IServiceProvider>(

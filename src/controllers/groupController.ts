@@ -48,9 +48,13 @@ export const createGroup = async (req: Request, res: Response) => {
 // Get All Groups
 export const getAllGroups = async (req: Request, res: Response) => {
   try {
-    const groups = await Group.find({
-      $or: [{ admin: req.params.id }, { members: req.params.id }],
-    })
+    let query = {};
+    if (req.query.user) {
+      query = {
+        $or: [{ admin: req.query.user }, { members: req.query.user }],
+      };
+    }
+    const groups = await Group.find(query)
       .populate("members", "-password")
       .populate("admin", "-password");
     res.status(200).json(groups);

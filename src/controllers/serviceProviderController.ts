@@ -3,6 +3,10 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import ServiceProvider from "../models/ServiceProvider";
 import User from "../models/User";
+import QrCodeModel from "../models/QrCode";
+import * as QRCode from "qrcode";
+import Cloudinary from "../config/cloudinary";
+import { ObjectId } from "mongoose";
 
 // Sign Up
 export const signUp = async (req: Request, res: Response) => {
@@ -18,6 +22,7 @@ export const signUp = async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
     const serviceProvider = new ServiceProvider({
       name: req.body.name,
       email: req.body.email,
@@ -26,11 +31,36 @@ export const signUp = async (req: Request, res: Response) => {
       services: req.body.services,
       logo: req.body.logo,
     });
+
+    const qrcode = new QrCodeModel({
+      name: serviceProvider.name,
+      owner: serviceProvider._id,
+    });
+    const qrCodeUrl = await QRCode.toDataURL(
+      `${process.env.FRONTEND_BASE_URL}/scan?id=${qrcode.id}`,
+      {
+        width: 600,
+      }
+    );
+
+    const uploadedImage = await Cloudinary.uploader.upload(qrCodeUrl, {
+      overwrite: true,
+    });
+
+    qrcode.image = uploadedImage.secure_url;
+    await qrcode.save();
+    serviceProvider.qrCode = <ObjectId>qrcode._id;
+
     await serviceProvider.save();
-    const { password, ...serviceProviderWithoutPassword } =
-      serviceProvider.toObject();
+
+    const newServiceProvider = await ServiceProvider.findOne({
+      email: serviceProvider.email,
+    })
+      .populate("qrCode")
+      .select("-password");
+
     const token = jwt.sign(
-      serviceProviderWithoutPassword,
+      newServiceProvider!.toObject(),
       process.env.JWT_SECRET!,
       {
         expiresIn: "1d",
@@ -39,6 +69,8 @@ export const signUp = async (req: Request, res: Response) => {
 
     res.status(201).json({ token });
   } catch (error) {
+    console.log(error);
+
     res.status(400).json({ message: "Error creating service provider" });
   }
 };
@@ -46,7 +78,9 @@ export const signUp = async (req: Request, res: Response) => {
 // Get All Service Providers
 export const getAllProviders = async (req: Request, res: Response) => {
   try {
-    const serviceProviders = await ServiceProvider.find().select("-password");
+    const serviceProviders = await ServiceProvider.find()
+      .select("-password")
+      .populate("qrCode");
     res.status(200).json(serviceProviders);
   } catch (error) {
     res.status(500).json({ message: "Error fetching service providers" });
@@ -56,9 +90,9 @@ export const getAllProviders = async (req: Request, res: Response) => {
 // Get Service Provider By ID
 export const getProviderById = async (req: Request, res: Response) => {
   try {
-    const serviceProvider = await ServiceProvider.findById(
-      req.params.id
-    ).select("-password");
+    const serviceProvider = await ServiceProvider.findById(req.params.id)
+      .select("-password")
+      .populate("qrCode");
     if (!serviceProvider) {
       return res.status(404).json({ message: "Service provider not found" });
     }
@@ -81,7 +115,9 @@ export const updateProvider = async (req: Request, res: Response) => {
       req.params.id,
       updates,
       { new: true }
-    ).select("-password");
+    )
+      .select("-password")
+      .populate("qrCode");
     if (!updatedServiceProvider) {
       return res.status(404).json({ message: "Service provider not found" });
     }

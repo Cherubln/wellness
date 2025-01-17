@@ -15,7 +15,7 @@ const router = Router();
 router.post("/", createGroup);
 
 // Route to get all groups
-router.get("/user/:id", getAllGroups);
+router.get("/", getAllGroups);
 
 // Route to get a group by ID
 router.get("/:id", getGroupById as RequestHandler);

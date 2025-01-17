@@ -34,7 +34,8 @@ export const createService = async (req: Request, res: Response) => {
 // Get All Services
 export const getAllServices = async (req: Request, res: Response) => {
   try {
-    const services = await Service.find({ provider: req.params.provider });
+    const query = req.query.provider ? { provider: req.query.provider } : {};
+    const services = await Service.find(query);
     res.status(200).json(services);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });

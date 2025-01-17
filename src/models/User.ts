@@ -12,6 +12,8 @@ interface IUser extends Document {
   groups: Schema.Types.ObjectId[];
   role?: string;
   points?: number;
+  favoriteActivity?: string;
+  hasScanned?: string[];
 }
 
 const UserSchema = new Schema<IUser>(
@@ -27,6 +29,8 @@ const UserSchema = new Schema<IUser>(
     groups: [{ type: Schema.Types.ObjectId, ref: "Group" }],
     role: { type: String, default: "user" },
     points: { type: Number, default: 500 },
+    favoriteActivity: { type: String, default: "" },
+    hasScanned: { type: [String], default: [] },
   },
   { timestamps: true }
 );

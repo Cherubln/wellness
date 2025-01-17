@@ -13,7 +13,7 @@ const router = Router();
 router.post("/", createService);
 
 // Route to get all services
-router.get("/provider/:provider", getAllServices);
+router.get("/", getAllServices);
 
 // Route to get a service by ID
 router.get("/:id", getServiceById as RequestHandler);
