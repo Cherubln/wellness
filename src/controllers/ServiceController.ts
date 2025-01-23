@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Service from "../models/Service";
 import Cloudinary from "../config/cloudinary";
+import ServiceProvider from "../models/ServiceProvider"; // Reference to ServiceProvider model
 
 // Create Service
 export const createService = async (req: Request, res: Response) => {
@@ -29,10 +30,10 @@ export const createService = async (req: Request, res: Response) => {
       activityName,
       availability,
       description,
-      location,
+      location, // Array of locations
       phoneContact,
       category,
-      provider,
+      provider, // Reference to provider
       images: imageUrls, // Store URLs in images array
     });
 
@@ -47,7 +48,7 @@ export const createService = async (req: Request, res: Response) => {
 export const getAllServices = async (req: Request, res: Response) => {
   try {
     const query = req.query.provider ? { provider: req.query.provider } : {};
-    const services = await Service.find(query);
+    const services = await Service.find(query).populate("provider", "_id name"); // Populate provider field with _id and name only
     res.status(200).json(services);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
@@ -57,7 +58,10 @@ export const getAllServices = async (req: Request, res: Response) => {
 // Get Single Service
 export const getServiceById = async (req: Request, res: Response) => {
   try {
-    const service = await Service.findById(req.params.id);
+    const service = await Service.findById(req.params.id).populate(
+      "provider",
+      "_id name"
+    ); // Populate provider field with _id and name only
     if (!service) {
       return res.status(404).json({ message: "Service not found" });
     }
@@ -74,7 +78,7 @@ export const updateService = async (req: Request, res: Response) => {
       req.params.id,
       req.body,
       { new: true }
-    );
+    ).populate("provider", "_id name"); // Populate provider field with _id and name only
     if (!updatedService) {
       return res.status(404).json({ message: "Service not found" });
     }

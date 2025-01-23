@@ -4,10 +4,10 @@ interface Service extends Document {
   activityName: string;
   availability: string;
   description: string;
-  location: string;
+  location: string[];
   phoneContact: string;
   category: string;
-  provider: string;
+  provider: Schema.Types.ObjectId;
   images: string[];
 }
 
@@ -15,10 +15,10 @@ const serviceSchema = new Schema<Service>({
   activityName: { type: String, required: true },
   availability: { type: String, required: true },
   description: { type: String },
-  location: { type: String, required: true },
+  location: { type: [String], required: true }, // Updated to accept multiple locations
   phoneContact: { type: String },
   category: { type: String, required: true },
-  provider: { type: String, required: true },
+  provider: { type: Schema.Types.ObjectId, ref: "ServiceProvider" },
   images: {
     type: [String],
     validate: [arrayLimit, "{PATH} exceeds the limit of 3"],
