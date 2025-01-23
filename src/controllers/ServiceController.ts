@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Service from "../models/Service";
+import Cloudinary from "../config/cloudinary";
 
 // Create Service
 export const createService = async (req: Request, res: Response) => {
@@ -12,7 +13,17 @@ export const createService = async (req: Request, res: Response) => {
       phoneContact,
       category,
       provider,
+      images,
     } = req.body;
+
+    // Upload images to Cloudinary and store URLs in images array
+    const imageUrls = [];
+    if (images && images.length > 0) {
+      for (const image of images) {
+        const result = await Cloudinary.uploader.upload(image);
+        imageUrls.push(result.secure_url);
+      }
+    }
 
     const service = new Service({
       activityName,
@@ -22,6 +33,7 @@ export const createService = async (req: Request, res: Response) => {
       phoneContact,
       category,
       provider,
+      images: imageUrls, // Store URLs in images array
     });
 
     await service.save();
