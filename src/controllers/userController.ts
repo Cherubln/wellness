@@ -3,6 +3,57 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 import ServiceProvider from "../models/ServiceProvider";
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import dotenv from "dotenv";
+dotenv.config();
+
+// Initialize passport
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      callbackURL: "http://localhost:5000/api/users/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const email = profile.emails![0].value;
+        let user = await User.findOne({ email });
+        if (!user) {
+          user = await User.create({
+            fullname: profile.displayName,
+            username: profile.id,
+            email,
+            password: "", // No password for Google Auth users
+          });
+        }
+        const { password, ...userWithoutPassword } = user.toObject();
+        done(null, userWithoutPassword);
+      } catch (error) {
+        console.log({ error });
+
+        done(error, undefined);
+      }
+    }
+  )
+);
+
+// Google auth route handler
+export const googleAuth = passport.authenticate("google", {
+  scope: ["profile", "email"],
+});
+
+export const googleAuthCallback = passport.authenticate("google", {
+  failureRedirect: "/login",
+});
+
+export const googleAuthRedirect = (req: Request, res: Response) => {
+  const token = jwt.sign(req.user!, process.env.JWT_SECRET!, {
+    expiresIn: "1h",
+  });
+  res.redirect(`http://localhost:3000/dashboard?token=${token}`);
+};
 
 // Sign Up
 export const signUp = async (req: Request, res: Response) => {

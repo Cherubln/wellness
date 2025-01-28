@@ -1,4 +1,5 @@
 import { RequestHandler, Router } from "express";
+import passport from "passport";
 import {
   signUp,
   signIn,
@@ -6,6 +7,9 @@ import {
   getUserById,
   updateUser,
   deleteUser,
+  googleAuth,
+  googleAuthCallback,
+  googleAuthRedirect,
 } from "../controllers/userController";
 
 const router = Router();
@@ -19,6 +23,9 @@ router.post("/signin", signIn as RequestHandler);
 // Route to get all users
 router.get("/", getAllUsers as RequestHandler);
 
+// Route to initiate Google Auth
+router.get("/google", googleAuth as RequestHandler);
+
 // Route to get a user by ID
 router.get("/:id", getUserById as RequestHandler);
 
@@ -27,5 +34,12 @@ router.put("/:id", updateUser as RequestHandler);
 
 // Route to delete a user
 router.delete("/:id", deleteUser as RequestHandler);
+
+// Route to handle Google Auth callback
+router.get(
+  "/google/callback",
+  googleAuthCallback as RequestHandler,
+  googleAuthRedirect as RequestHandler
+);
 
 export default router;
