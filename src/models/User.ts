@@ -1,4 +1,5 @@
 import { Schema, model, Document } from "mongoose";
+import { allowedNodeEnvironmentFlags } from "process";
 
 interface IUser extends Document {
   email: string;
@@ -14,6 +15,7 @@ interface IUser extends Document {
   points?: number;
   favoriteActivity?: string;
   hasScanned?: string[];
+  googleId?: string;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -22,6 +24,7 @@ const UserSchema = new Schema<IUser>(
     password: { type: String, required: true },
     fullname: { type: String, required: true },
     username: { type: String, required: true, unique: true },
+    googleId: { type: String, allowNull: true },
     phonenumber: { type: String },
     profilePicture: { type: String },
     gender: { type: String },

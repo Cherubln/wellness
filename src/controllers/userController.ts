@@ -18,18 +18,18 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const email = profile.emails![0].value;
-        let user = await User.findOne({ email });
-        if (!user) {
-          user = await User.create({
-            fullname: profile.displayName,
-            username: profile.id,
-            email,
-            password: "", // No password for Google Auth users
-          });
-        }
-        const { password, ...userWithoutPassword } = user.toObject();
-        done(null, userWithoutPassword);
+        // const email = profile.emails![0].value;
+        // let user = await User.findOne({ email });
+        // if (!user) {
+        //   user = await User.create({
+        //     fullname: profile.displayName,
+        //     username: profile.id,
+        //     email,
+        //     password: "", // No password for Google Auth users
+        //   });
+        // }
+        // const { password, ...userWithoutPassword } = user.toObject();
+        done(null, profile);
       } catch (error) {
         console.log({ error });
 
@@ -45,7 +45,7 @@ export const googleAuth = passport.authenticate("google", {
 });
 
 export const googleAuthCallback = passport.authenticate("google", {
-  failureRedirect: "/login",
+  failureRedirect: "/http://localhost:3000/auth",
 });
 
 export const googleAuthRedirect = (req: Request, res: Response) => {

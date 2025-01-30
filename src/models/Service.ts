@@ -9,6 +9,7 @@ interface Service extends Document {
   category: string;
   provider: Schema.Types.ObjectId;
   images: string[];
+  price: number;
 }
 
 const serviceSchema = new Schema<Service>({
@@ -23,6 +24,7 @@ const serviceSchema = new Schema<Service>({
     type: [String],
     validate: [arrayLimit, "{PATH} exceeds the limit of 3"],
   }, // Field to store up to 3 images
+  price: { type: Number, required: true, default: 0 },
 });
 
 // Custom validator to ensure array length does not exceed 3

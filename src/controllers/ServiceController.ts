@@ -15,6 +15,7 @@ export const createService = async (req: Request, res: Response) => {
       category,
       provider,
       images,
+      price,
     } = req.body;
 
     // Upload images to Cloudinary and store URLs in images array
@@ -35,6 +36,7 @@ export const createService = async (req: Request, res: Response) => {
       category,
       provider, // Reference to provider
       images: imageUrls, // Store URLs in images array
+      price,
     });
 
     await service.save();
@@ -74,6 +76,22 @@ export const getServiceById = async (req: Request, res: Response) => {
 // Update Service
 export const updateService = async (req: Request, res: Response) => {
   try {
+    const { images } = req.body;
+    // Upload images to Cloudinary and store URLs in images array
+    const imageUrls = [];
+    if (images && images.length > 0) {
+      for (const image of images) {
+        if (image.includes("cloudinary")) {
+          imageUrls.push(image);
+          continue;
+        }
+
+        const result = await Cloudinary.uploader.upload(image);
+        imageUrls.push(result.secure_url);
+      }
+    }
+    req.body.images = imageUrls; // Store URLs in images array
+
     const updatedService = await Service.findByIdAndUpdate(
       req.params.id,
       req.body,

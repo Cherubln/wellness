@@ -1,5 +1,5 @@
 import { RequestHandler, Router } from "express";
-import passport from "passport";
+import cors from "cors";
 import {
   signUp,
   signIn,
@@ -24,7 +24,7 @@ router.post("/signin", signIn as RequestHandler);
 router.get("/", getAllUsers as RequestHandler);
 
 // Route to initiate Google Auth
-router.get("/google", googleAuth as RequestHandler);
+router.get("/google", cors(), googleAuth as RequestHandler);
 
 // Route to get a user by ID
 router.get("/:id", getUserById as RequestHandler);

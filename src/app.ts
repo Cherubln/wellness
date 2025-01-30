@@ -14,11 +14,7 @@ dotenv.config();
 connectDB();
 
 const app = express();
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+app.use(cors());
 
 app.use(express.json({ limit: "10mb" }));
 app.use(
@@ -41,8 +37,8 @@ passport.serializeUser((user, done) => {
   done(null, user);
 });
 
-passport.deserializeUser((user: Express.User, done) => {
-  done(null, user);
+passport.deserializeUser((user, done) => {
+  done(null, <Express.User>user);
 });
 
 app.get("/", (req, res) => {
