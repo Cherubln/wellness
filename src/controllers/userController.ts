@@ -14,7 +14,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: "http://localhost:5000/api/users/google/callback",
+      callbackURL: `${process.env.BACKEND_BASE_URL}/api/users/google/callback`,
       passReqToCallback: true,
     },
     async (req, accessToken, refreshToken, profile, done) => {
@@ -58,14 +58,14 @@ export const googleAuth = passport.authenticate("google", {
 });
 
 export const googleAuthCallback = passport.authenticate("google", {
-  failureRedirect: "/http://localhost:3000/auth",
+  failureRedirect: `/${process.env.FRONTEND_BASE_URL}/auth`,
 });
 
 export const googleAuthRedirect = (req: Request, res: Response) => {
   const token = jwt.sign(req.user!, process.env.JWT_SECRET!, {
     expiresIn: "1h",
   });
-  res.redirect(`http://localhost:3000/dashboard?token=${token}`);
+  res.redirect(`${process.env.FRONTEND_BASE_URL}/dashboard?token=${token}`);
 };
 
 // Sign Up
