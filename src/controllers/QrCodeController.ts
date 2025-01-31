@@ -22,27 +22,26 @@ export const createQrCode = async (
     //   : undefined;
 
     const qrcode = new QrCodeModel({ ...req.body });
-    const qrCodeUrl = await QRCode.toDataURL(
-      `${process.env.FRONTEND_BASE_URL}/scan?id=${qrcode.id}`,
-      {
-        width: 600,
-      }
-    );
+
     const provider = req.query.provider;
     if (provider) {
       const user = await ServiceProvider.findById(provider);
       if (user) {
         user.qrCode = <ObjectId>qrcode._id;
+        let qrCodeUrl = await QRCode.toDataURL(
+          `${process.env.FRONTEND_BASE_URL}/scan?id=${qrcode.id}&&points=${qrcode.points}&&provider=${user.name}`,
+          {
+            width: 600,
+          }
+        );
+        const uploadedImage = await Cloudinary.uploader.upload(qrCodeUrl, {
+          overwrite: true,
+        });
+        qrcode.image = uploadedImage.secure_url;
         await user.save();
+        await qrcode.save();
       }
     }
-
-    const uploadedImage = await Cloudinary.uploader.upload(qrCodeUrl, {
-      overwrite: true,
-    });
-
-    qrcode.image = uploadedImage.secure_url;
-    await qrcode.save();
 
     res.status(201).json({
       message: "QR code created successfully",

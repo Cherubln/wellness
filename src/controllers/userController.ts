@@ -15,21 +15,34 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       callbackURL: "http://localhost:5000/api/users/google/callback",
+      passReqToCallback: true,
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (req, accessToken, refreshToken, profile, done) => {
       try {
-        // const email = profile.emails![0].value;
-        // let user = await User.findOne({ email });
-        // if (!user) {
-        //   user = await User.create({
-        //     fullname: profile.displayName,
-        //     username: profile.id,
-        //     email,
-        //     password: "", // No password for Google Auth users
-        //   });
-        // }
-        // const { password, ...userWithoutPassword } = user.toObject();
-        done(null, profile);
+        const email = profile.emails![0].value;
+        let user = await User.findOne({ email });
+        if (user && !user?.googleId) {
+          user.googleId === profile.id;
+          await user.save();
+        }
+        if (!user) {
+          const randomPart = Math.floor(Math.random() * 100).toString();
+          const timestampPart = Date.now().toString().slice(-2);
+          user = await User.create({
+            fullname: profile.displayName,
+            username:
+              profile.username ||
+              `${
+                profile.displayName.split(" ")[0]
+              }${randomPart}${timestampPart}`,
+            email,
+            password: "", // No password for Google Auth users
+            googleId: profile.id,
+          });
+        }
+        const { password, ...userWithoutPassword } = user.toObject();
+        req.user = userWithoutPassword;
+        done(null, userWithoutPassword);
       } catch (error) {
         console.log({ error });
 
