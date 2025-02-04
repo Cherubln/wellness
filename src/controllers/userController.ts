@@ -58,7 +58,7 @@ export const googleAuth = passport.authenticate("google", {
 });
 
 export const googleAuthCallback = passport.authenticate("google", {
-  failureRedirect: `/${process.env.FRONTEND_BASE_URL}/auth`,
+  failureRedirect: `${process.env.FRONTEND_BASE_URL}/auth`,
 });
 
 export const googleAuthRedirect = (req: Request, res: Response) => {

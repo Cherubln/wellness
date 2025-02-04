@@ -29,7 +29,7 @@ export const createQrCode = async (
       if (user) {
         user.qrCode = <ObjectId>qrcode._id;
         let qrCodeUrl = await QRCode.toDataURL(
-          `${process.env.FRONTEND_BASE_URL}/scan?id=${qrcode.id}&&points=${qrcode.points}&&provider=${user.name}`,
+          `${process.env.FRONTEND_BASE_URL}/scan?id=${qrcode.id}`,
           {
             width: 600,
           }
@@ -143,5 +143,47 @@ export const getQrById = async (req: Request, res: Response): Promise<any> => {
   } catch (error) {
     console.error("Error fetching QR code by ID:", error);
     res.status(500).json({ message: "Internal server error", error: error });
+  }
+};
+
+export const updateAllQrCodes = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const qrCodes = await QrCodeModel.find();
+    if (!qrCodes.length) {
+      return res.status(404).json({
+        message: "No QR codes found",
+      });
+    }
+
+    const updatedQrCodes = await Promise.all(
+      qrCodes.map(async (qrcode) => {
+        let qrCodeUrl = await QRCode.toDataURL(
+          `${process.env.FRONTEND_BASE_URL}/scan?id=${qrcode.id}`,
+          { width: 600 }
+        );
+
+        const uploadedImage = await Cloudinary.uploader.upload(qrCodeUrl, {
+          overwrite: true,
+        });
+
+        qrcode.image = uploadedImage.secure_url;
+        await qrcode.save();
+        return qrcode;
+      })
+    );
+
+    res.status(200).json({
+      message: "All QR codes updated successfully",
+      updatedQrCodes,
+    });
+  } catch (error) {
+    console.error("Error updating QR codes:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error,
+    });
   }
 };

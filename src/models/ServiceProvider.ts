@@ -9,6 +9,8 @@ interface IServiceProvider extends Document {
   logo?: string;
   role: string;
   qrCode?: Schema.Types.ObjectId;
+  whatsappLink?: string; // Added whatsappLink to userData
+  instagramLink?: string; // Added instagramLink to userData
 }
 
 const ServiceProviderSchema = new Schema<IServiceProvider>({
@@ -20,6 +22,8 @@ const ServiceProviderSchema = new Schema<IServiceProvider>({
   role: { type: String, default: "service_provider" },
   logo: { type: String }, // Made optional
   qrCode: { type: Schema.Types.ObjectId, ref: "QrCode" },
+  whatsappLink: { type: String, default: "" }, // Added whatsappLink to userData
+  instagramLink: { type: String, default: "" }, // Added instagramLink to userData
 });
 
 export default model<IServiceProvider>(

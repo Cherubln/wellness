@@ -30,6 +30,8 @@ export const signUp = async (req: Request, res: Response) => {
       phoneNumber: req.body.phoneNumber,
       services: req.body.services,
       logo: req.body.logo,
+      whatsappLink: req.body.whatsappLink,
+      instagramLink: req.body.instagramLink,
     });
 
     const qrcode = new QrCodeModel({

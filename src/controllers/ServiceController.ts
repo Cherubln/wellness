@@ -50,7 +50,10 @@ export const createService = async (req: Request, res: Response) => {
 export const getAllServices = async (req: Request, res: Response) => {
   try {
     const query = req.query.provider ? { provider: req.query.provider } : {};
-    const services = await Service.find(query).populate("provider", "_id name"); // Populate provider field with _id and name only
+    const services = await Service.find(query).populate(
+      "provider",
+      "_id name email phoneNumber logo whatsappLink instagramLink"
+    ); // Populate provider field with _id and name only
     res.status(200).json(services);
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
@@ -62,7 +65,7 @@ export const getServiceById = async (req: Request, res: Response) => {
   try {
     const service = await Service.findById(req.params.id).populate(
       "provider",
-      "_id name"
+      "_id name email phoneNumber logo whatsappLink instagramLink"
     ); // Populate provider field with _id and name only
     if (!service) {
       return res.status(404).json({ message: "Service not found" });
@@ -90,13 +93,24 @@ export const updateService = async (req: Request, res: Response) => {
         imageUrls.push(result.secure_url);
       }
     }
+    if (req.body.provider) {
+      const provider = await ServiceProvider.findById(req.body.provider._id);
+      if (provider) {
+        provider.whatsappLink = req.body.provider.whatsappLink;
+        provider.instagramLink = req.body.provider.instagramLink;
+        await provider?.save();
+      }
+    }
     req.body.images = imageUrls; // Store URLs in images array
 
     const updatedService = await Service.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
-    ).populate("provider", "_id name"); // Populate provider field with _id and name only
+    ).populate(
+      "provider",
+      "_id name  email phoneNumber logo whatsappLink instagramLink"
+    ); // Populate provider field with _id and name only
     if (!updatedService) {
       return res.status(404).json({ message: "Service not found" });
     }
